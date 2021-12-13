@@ -1,0 +1,53 @@
+docker pull ibmcom/mono2micro-bluejay
+docker pull ibmcom/mono2micro-aipl
+docker pull ibmcom/mono2micro-cardinal
+docker pull ibmcom/mono2micro-ui
+
+git clone https://github.com/WASdev/sample.daytrader7.git
+
+1. 정적 분석
+docker run -e LICENSE=accept --rm -it -v /m2m/sellers:/var/application ibmcom/mono2micro-bluejay /var/application/src
+
+cd /m2m/sellers/src-klu
+
+mvn install
+
+export WLP_USER_DIR=/m2m/sellers/src-klu/daytrader-ee7-wlpcfg
+/m2m/sellers/src-klu/daytrader-ee7/target/liberty/wlp/bin/server start daytrader7Sample 
+http://192.168.100.104:9082/daytrader/
+
+cd /mnt/m2m/Flicker/
+java -cp flicker-1.0.jar:commons-net-3.6.jar:json-simple-1.1.jar:. Flicker -no_ntp
+
+mkdir -p /m2m/sellers/tables
+mkdir -p /m2m/sellers/contexts
+mkdir -p /m2m/sellers/logs
+ docker run --name mono2micro-aipl --cpu-shares=4096 --cpus=4 --memory=4g -e LICENSE=accept --rm -it -v /m2m/kmtc:/var/application ibmcom/mono2micro-aipl
+
+
+docker run --cpu-shares=8192 --cpus=8 --memory="4g" -e LICENSE=accept --rm -it -v /m2m/kmtc:/var/application ibmcom/mono2micro-aipl
+
+--cp /m2m/sellers/src-klu/*json /m2m/sellers/tables
+--cp /m2m/sellers/src-klu/daytrader-ee7-wlpcfg/servers/daytrader7Sample/logs/console.log  /m2m/sellers/logs
+--cp /mnt/m2m/Mono2Micro-Monolith-DataCollector/Flicker/*.json /m2m/sellers/contexts
+
+--ls -rtl /m2m/sellers/tables
+--ls -rtl /m2m/sellers/contexts
+--ls -rtl /m2m/sellers/logs
+
+2. 동적 분석
+docker run -e LICENSE=accept --rm -it -v /m2m/sellers:/var/application ibmcom/mono2micro-aipl regen_p
+
+3. M2M UI
+docker run -e LICENSE=accept -d -p 3000:3000 --name=m2mgui ibmcom/mono2micro-ui
+
+4. 코드분할
+docker run -e LICENSE=accept --rm -it -v /m2m/sellers/:/var/application ibmcom/mono2micro-cardinal /var/application/src /var/application/mono2micro/mono2micro-output/cardinal
+
+/mnt/m2m/daytrader 디렉토리의 모든 내용이
+docker 컨테이너의 /var/application 로 mount 되는것
+
+cd /mnt/m2m/daytrader/microservices
+--./run_db2_container.sh
+docker-compose up -d
+docker-compose logs -f

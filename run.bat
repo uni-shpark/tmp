@@ -1,0 +1,1 @@
+java -Dworkspace=E:\workspace_sellers\sellers -Dorg.src.dir.nm=src -Ddistribute=false -Dserver.port=9000 -jar M2MToolWeb-0.0.1-SNAPSHOT.jar
